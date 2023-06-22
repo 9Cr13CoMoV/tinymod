@@ -2,6 +2,7 @@ use std::env;
 use std::env::current_dir;
 use std::fs::*;
 use std::io;
+use std::path::Path;
 use std::path::PathBuf;
 use fltk::{prelude::*, *};
 
@@ -19,7 +20,6 @@ fn main() {
 
     let mut config_check = false;
     let mut exe_check = false;
-
     for entry_result in read_dir(work_dir).unwrap() {
         if let Some(filename) = entry_result.unwrap().path().file_name() {
             match filename.to_str() {
@@ -37,7 +37,16 @@ fn main() {
         config_prompt();
     }
 
-    let config_file = 
+    let mut config_path = PathBuf::new();
+    config_path.push(current_dir().unwrap());
+    config_path.push("tinymod.config");
+    let config_file = read_to_string(config_path).unwrap();
+    let mut config_iterator = config_file.lines();
+    let data_path = config_iterator.next().unwrap();
+    let mut data_ids = Vec::new();
+    for line in config_iterator {
+        data_ids.push(line);
+    }
 
 }
 
