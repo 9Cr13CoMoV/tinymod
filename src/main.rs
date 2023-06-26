@@ -1,10 +1,10 @@
-use std::env;
+use fltk::{prelude::*, *};
 use std::env::current_dir;
 use std::fs::*;
 use std::io;
-use std::path::Path;
 use std::path::PathBuf;
-use fltk::{prelude::*, *};
+use std::process::Command;
+use csv::{ReaderBuilder};
 
 #[derive(Debug)]
 enum TSARS_ERR {
@@ -13,7 +13,7 @@ enum TSARS_ERR {
     WrongAppPath,
     WrongDataPath,
     ScriptFailed,
-    BAD_DATA,
+    BadData,
 }
 fn main() {
     let work_dir = current_dir().unwrap();
@@ -37,10 +37,7 @@ fn main() {
         config_prompt();
     }
 
-    let mut config_path = PathBuf::new();
-    config_path.push(current_dir().unwrap());
-    config_path.push("tinymod.config");
-    let config_file = read_to_string(config_path).unwrap();
+    let config_file = read_to_string(config_filepath()).unwrap();
     let mut config_iterator = config_file.lines();
     let data_path = config_iterator.next().unwrap();
     let mut data_ids = Vec::new();
@@ -48,6 +45,28 @@ fn main() {
         data_ids.push(line);
     }
 
+    let mut app_path = PathBuf::new();
+    app_path.push(current_dir().unwrap());
+    app_path.push("tinySA-App.exe");
+    let app_return = Command::new(app_path).output();
+
+    if let Ok(_ret_val) = app_return {
+        let new_configfile = read_to_string(config_filepath()).unwrap();
+        let mut new_iter = new_configfile.lines();
+        let _data_path = new_iter.next();
+        for line in new_iter {
+            if !data_ids.contains(&line) {
+                data_ids.push(line);
+                //begin conversion
+                let file_to_convert = 
+                let reader = ReaderBuilder::new()
+                                .delimiter(b';' )
+                                //.from_reader() 
+                // Export file without quotes and headers
+            }
+        }
+        // write updated config file
+    }
 }
 
 fn config_prompt() {
@@ -57,4 +76,11 @@ fn config_prompt() {
     if let Ok(in_n) = io::stdin().read_line(&mut usr_in) {
         write("tinymod.config", usr_in);
     }
+}
+
+fn config_filepath() -> PathBuf {
+    let mut config_path = PathBuf::new();
+    config_path.push(current_dir().unwrap());
+    config_path.push("tinymod.config");
+    config_path
 }
