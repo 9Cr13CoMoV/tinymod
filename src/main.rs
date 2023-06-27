@@ -1,4 +1,3 @@
-use fltk::{prelude::*, *};
 use std::env::current_dir;
 use std::fs::*;
 use std::io;
@@ -6,21 +5,10 @@ use std::path::PathBuf;
 use std::process::Command;
 use csv::{ReaderBuilder};
 
-#[derive(Debug)]
-enum TSARS_ERR {
-    OK,
-    MissingConfig,
-    WrongAppPath,
-    WrongDataPath,
-    ScriptFailed,
-    BadData,
-}
 fn main() {
-    let work_dir = current_dir().unwrap();
-
     let mut config_check = false;
     let mut exe_check = false;
-    for entry_result in read_dir(work_dir).unwrap() {
+    for entry_result in read_dir(work_dir()).unwrap() {
         if let Some(filename) = entry_result.unwrap().path().file_name() {
             match filename.to_str() {
                 Some("tinymod.config") => config_check = true,
@@ -34,53 +22,56 @@ fn main() {
         return;
     }
     if !config_check {
-        config_prompt();
+       config_generator();
     }
 
     let config_file = read_to_string(config_filepath()).unwrap();
     let mut config_iterator = config_file.lines();
-    let data_path = config_iterator.next().unwrap();
     let mut data_ids = Vec::new();
     for line in config_iterator {
         data_ids.push(line);
     }
 
-    let mut app_path = PathBuf::new();
-    app_path.push(current_dir().unwrap());
+    let mut app_path = work_dir();
     app_path.push("tinySA-App.exe");
     let app_return = Command::new(app_path).output();
 
     if let Ok(_ret_val) = app_return {
-        let new_configfile = read_to_string(config_filepath()).unwrap();
-        let mut new_iter = new_configfile.lines();
-        let _data_path = new_iter.next();
-        for line in new_iter {
-            if !data_ids.contains(&line) {
-                data_ids.push(line);
-                //begin conversion
-                let file_to_convert = 
-                let reader = ReaderBuilder::new()
-                                .delimiter(b';' )
-                                //.from_reader() 
-                // Export file without quotes and headers
-            }
+        let mut new_iter = config_file.lines();
+        for entry_result in read_dir(work_dir()).unwrap() {
+            if let Some(filename) = entry_result.unwrap().path().file_name() {
+                if !data_ids.contains(&filename.to_str().unwrap()) {
+                    data_ids.push(filename.to_str().unwrap());
+
+                    let mut filepath = work_dir();
+                    filepath.push(filename);
+                    let mut file_to_convert = ReaderBuilder::new().has_headers(false).from_path(filepath);
+                    let mut file = file_to_convert.unwrap().records();
+                    for data in file {
+                        
+                    }
+                    //let reader = ReaderBuilder::new()
+                    //                .delimiter(b';' )
+                                    //.from_reader() 
+                    // Export file without quotes and headers
+                }
+            } 
         }
         // write updated config file
     }
 }
 
-fn config_prompt() {
-    println!("tinymod needs to be configured");
-    println!("Enter the directory where CSVs will be saved: ");
-    let mut usr_in = String::new();
-    if let Ok(in_n) = io::stdin().read_line(&mut usr_in) {
-        write("tinymod.config", usr_in);
-    }
+fn work_dir() -> PathBuf {
+    let mut work_path = PathBuf::new();
+    work_path.push(current_dir().unwrap());
+    work_path
 }
 
 fn config_filepath() -> PathBuf {
-    let mut config_path = PathBuf::new();
-    config_path.push(current_dir().unwrap());
+    let mut config_path = work_dir();
     config_path.push("tinymod.config");
     config_path
 }
+ fn config_generator() {
+    write(config_filepath(), "");
+ }

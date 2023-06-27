@@ -5,4 +5,3 @@ edition = "2021"
 
 [dependencies]
 csv = "1.2.2"
-fltk = "1.4.5"
