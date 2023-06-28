@@ -38,7 +38,7 @@ fn main() {
     app_path.push("tinySA-App.exe");
     let app_return = Command::new(app_path).output();
 
-    // intention: compare the results of read_dir() before and after running the app.
+    // intention: compare the results of read_dir() before and after running the app. new files will be processed, old one will not
     // problem: the handle to the "after" data doesn't want to be brought outside the scope
 
     if let Ok(_ret_val) = app_return {
