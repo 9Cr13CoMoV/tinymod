@@ -1,11 +1,13 @@
+use csv::ReaderBuilder;
 use std::env::current_dir;
 use std::fs::*;
 use std::io;
 use std::path::PathBuf;
 use std::process::Command;
-use csv::{ReaderBuilder};
 
 fn main() {
+    // don't really need a config file: just compare read_dir() before and after
+    // this script, the app, and the files of concern will all be pre-placed in the same usr dir
     let mut config_check = false;
     let mut exe_check = false;
     for entry_result in read_dir(work_dir()).unwrap() {
@@ -22,7 +24,7 @@ fn main() {
         return;
     }
     if !config_check {
-       config_generator();
+        config_generator();
     }
 
     let config_file = read_to_string(config_filepath()).unwrap();
@@ -36,6 +38,9 @@ fn main() {
     app_path.push("tinySA-App.exe");
     let app_return = Command::new(app_path).output();
 
+    // intention: compare the results of read_dir() before and after running the app.
+    // problem: the handle to the "after" data doesn't want to be brought outside the scope
+
     if let Ok(_ret_val) = app_return {
         let mut new_iter = config_file.lines();
         for entry_result in read_dir(work_dir()).unwrap() {
@@ -45,17 +50,16 @@ fn main() {
 
                     let mut filepath = work_dir();
                     filepath.push(filename);
-                    let mut file_to_convert = ReaderBuilder::new().has_headers(false).from_path(filepath);
+                    let mut file_to_convert =
+                        ReaderBuilder::new().has_headers(false).from_path(filepath);
                     let mut file = file_to_convert.unwrap().records();
-                    for data in file {
-                        
-                    }
+                    for data in file {}
                     //let reader = ReaderBuilder::new()
                     //                .delimiter(b';' )
-                                    //.from_reader() 
+                    //.from_reader()
                     // Export file without quotes and headers
                 }
-            } 
+            }
         }
         // write updated config file
     }
@@ -72,6 +76,6 @@ fn config_filepath() -> PathBuf {
     config_path.push("tinymod.config");
     config_path
 }
- fn config_generator() {
+fn config_generator() {
     write(config_filepath(), "");
- }
+}
