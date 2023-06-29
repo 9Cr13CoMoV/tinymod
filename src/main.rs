@@ -1,4 +1,7 @@
+use std::clone;
 use std::env::current_dir;
+use std::ffi::OsStr;
+use std::ffi::OsString;
 use std::fs::*;
 use std::io;
 use std::path::PathBuf;
@@ -6,58 +9,33 @@ use std::process::Command;
 use csv::{ReaderBuilder};
 
 fn main() {
-    let mut config_check = false;
-    let mut exe_check = false;
+    // make list of files in dir
+    let mut pre_dir = Vec::new();
     for entry_result in read_dir(work_dir()).unwrap() {
-        if let Some(filename) = entry_result.unwrap().path().file_name() {
-            match filename.to_str() {
-                Some("tinymod.config") => config_check = true,
-                Some("tinySA-App.exe") => exe_check = true,
-                _ => (),
-            }
+        if let Ok(fname) = entry_result {
+            pre_dir.push(fname.path());
         }
     }
-    if !exe_check {
-        println!("TinySA-App.exe not located.");
-        return;
-    }
-    if !config_check {
-       config_generator();
-    }
-
-    let config_file = read_to_string(config_filepath()).unwrap();
-    let mut config_iterator = config_file.lines();
-    let mut data_ids = Vec::new();
-    for line in config_iterator {
-        data_ids.push(line);
-    }
-
+    // run the app
     let mut app_path = work_dir();
     app_path.push("tinySA-App.exe");
     let app_return = Command::new(app_path).output();
+    // make new list of files in the dir
+    let mut post_dir = Vec::new();
+    for entry_result in read_dir(work_dir()).unwrap() {
+        if let Ok(fname) = entry_result {
+            post_dir.push(fname.path());
+        }
+    }
 
     if let Ok(_ret_val) = app_return {
-        let mut new_iter = config_file.lines();
-        for entry_result in read_dir(work_dir()).unwrap() {
-            if let Some(filename) = entry_result.unwrap().path().file_name() {
-                if !data_ids.contains(&filename.to_str().unwrap()) {
-                    data_ids.push(filename.to_str().unwrap());
-
-                    let mut filepath = work_dir();
-                    filepath.push(filename);
-                    let mut file_to_convert = ReaderBuilder::new().has_headers(false).from_path(filepath);
-                    let mut file = file_to_convert.unwrap().records();
-                    for data in file {
-                        
-                    }
-                    //let reader = ReaderBuilder::new()
-                    //                .delimiter(b';' )
-                                    //.from_reader() 
-                    // Export file without quotes and headers
-                }
-            } 
+        //compare pre and post
+        for name in post_dir {
+            if !pre_dir.contains(&name) {
+                // do the conversion to files made during the app session
+                
+            }
         }
-        // write updated config file
     }
 }
 
@@ -66,12 +44,3 @@ fn work_dir() -> PathBuf {
     work_path.push(current_dir().unwrap());
     work_path
 }
-
-fn config_filepath() -> PathBuf {
-    let mut config_path = work_dir();
-    config_path.push("tinymod.config");
-    config_path
-}
- fn config_generator() {
-    write(config_filepath(), "");
- }
