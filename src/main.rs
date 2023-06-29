@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 use std::clone;
+=======
+use csv::ReaderBuilder;
+>>>>>>> 0bbe60967fa5225fb32f5e83eff79287885dcdf7
 use std::env::current_dir;
 use std::ffi::OsStr;
 use std::ffi::OsString;
@@ -6,7 +10,6 @@ use std::fs::*;
 use std::io;
 use std::path::PathBuf;
 use std::process::Command;
-use csv::{ReaderBuilder};
 
 fn main() {
     // make list of files in dir
