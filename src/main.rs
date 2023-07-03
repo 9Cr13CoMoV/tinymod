@@ -43,7 +43,7 @@ fn main() {
                         if let Ok(line) = res_line {
                             let mut new_line = StringRecord::new();
                             for field in line.iter() {
-                                if let Ok(val) = field.parse::<f32>() {
+                                if let Ok(val) = field.trim().parse::<f32>() {
                                     match val.is_sign_positive() {
                                         true => {
                                             new_line.push_field(&format!("{:.3}", val / 1000000.0))
