@@ -1,4 +1,4 @@
-use csv::{ReaderBuilder, WriterBuilder, Writer, StringRecord};
+use csv::{ReaderBuilder, StringRecord, Writer, WriterBuilder};
 use std::env::current_dir;
 use std::fs::*;
 use std::path::PathBuf;
@@ -27,7 +27,6 @@ fn main() {
     }
 
     if let Ok(_ret_val) = app_return {
-
         //compare pre and post
         for name in post_dir {
             if !pre_dir.contains(&name) {
@@ -35,28 +34,34 @@ fn main() {
 
                 // do the conversion to these files
                 if let Ok(mut f_rdr) = ReaderBuilder::new()
-                        .has_headers(false)
-                        .delimiter(b';')
-                        .from_path(name) {
+                    .has_headers(false)
+                    .delimiter(b';')
+                    .from_path(name)
+                {
                     let mut temp_list = Vec::<StringRecord>::new();
                     for res_line in f_rdr.records() {
                         if let Ok(line) = res_line {
                             let mut new_line = StringRecord::new();
                             for field in line.iter() {
-                                let val: f32 = field.parse().unwrap();
-                                match val.is_sign_positive() {
-                                    true => new_line.push_field(&format!("{:.3}", val / 1000000.0)),
-                                    false => new_line.push_field(&format!("{:.0}", val * 0.8686)),
+                                if let Ok(val) = field.parse::<f32>() {
+                                    match val.is_sign_positive() {
+                                        true => {
+                                            new_line.push_field(&format!("{:.3}", val / 1000000.0))
+                                        }
+                                        false => {
+                                            new_line.push_field(&format!("{:.0}", val * 0.8686))
+                                        }
+                                    }
                                 }
-                            }                            
+                            }
                             temp_list.push(new_line);
                         }
                     }
                     let mut f_write = WriterBuilder::new()
-                    .delimiter(b',')
-                    .has_headers(false)
-                    .from_path(new_name)
-                    .unwrap();
+                        .delimiter(b',')
+                        .has_headers(false)
+                        .from_path(new_name)
+                        .unwrap();
                     for line in temp_list {
                         f_write.write_record(&line);
                     }
