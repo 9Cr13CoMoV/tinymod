@@ -1,4 +1,4 @@
-use csv::{ReaderBuilder, StringRecord, Writer, WriterBuilder};
+use csv::{ReaderBuilder, StringRecord, WriterBuilder};
 use std::env::current_dir;
 use std::fs::*;
 use std::path::PathBuf;
