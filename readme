@@ -1,4 +1,5 @@
-Automagically converts output from tinySA-App to be compatible with Shure Wireless Workbench
+Automagically converts output from tinySA-App to be compatible with Shure Wireless Workbench without user interaction.
+The process is "lossy" - the original files are overwritten with new formatting.
 
 Installation:
 1. Go to https://github.com/Rydwxz/tinymod
